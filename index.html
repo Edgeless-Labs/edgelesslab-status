@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Edgeless Lab Status</title>
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:system-ui,-apple-system,sans-serif;background:#0a0a0a;color:#e0e0e0;
+       display:flex;justify-content:center;align-items:center;min-height:100vh;padding:2rem}
+  .card{max-width:480px;width:100%;background:#141414;border:1px solid #222;border-radius:12px;
+        padding:2rem;text-align:center}
+  .state{font-size:1.25rem;font-weight:600;margin-bottom:.5rem}
+  .state.ok{color:#3fb950}
+  .state.degraded{color:#d29922}
+  .timestamp{font-size:.85rem;color:#8b8b8b;margin-top:1rem}
+  .note{font-size:.75rem;color:#666;margin-top:1.5rem;line-height:1.5}
+  a{color:#58a6ff}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="state" id="state">Loading…</div>
+  <div class="timestamp" id="updated">—</div>
+  <div class="note">
+    This page is intentionally hosted off-Cloudflare on <a href="https://pages.github.com">GitHub Pages</a>.
+    If edgelesslab.com is unreachable, this status page may also be affected by DNS resolution —
+    check via <a href="https://edgelesslab-status.github.io">direct URL</a>.
+  </div>
+</div>
+<script>
+  async function load() {
+    try {
+      const r = await fetch('status.json');
+      if (!r.ok) throw new r.statusText;
+      const d = await r.json();
+      const el = document.getElementById('state');
+      el.textContent = d.state === 'ok' ? 'All systems normal'
+                       : d.state === 'degraded' ? 'Cloudflare outage — Edgeless services degraded, stand-in mode'
+                       : d.message || 'Unknown';
+      el.className = 'state ' + (d.state === 'ok' ? 'ok' : 'degraded');
+      document.getElementById('updated').textContent = 'Updated: ' + new Date(d.updated_at).toISOString();
+    } catch(e) {
+      document.getElementById('state').textContent = 'Status unavailable';
+      document.getElementById('state').className = 'state degraded';
+    }
+  }
+  load();
+  setInterval(load, 30000);
+</script>
+</body>
+</html>
